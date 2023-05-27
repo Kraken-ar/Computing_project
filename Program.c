@@ -11,7 +11,7 @@ int main(){
 	//creat_user();
 	struct user User = auth();
 	printLargeAAST();
-	
+
 	while (1)
 	{
 		char a = User.auth;// auth();
@@ -49,13 +49,19 @@ int main(){
 			{
 				char gm;
 				printf("a => admin , p => professor , s => student , q for break : ");
+				fflush(stdin);
 				scanf("%c",&gm);
 				if(gm == 'q')
 				break;
-				else if(gm == 's')
+				else if(gm == 's'){
+				//printf("\n gelty\n");
 				get_student_data(0);
-				else if(gm == 'p')
+				break;
+				}
+				else if(gm == 'p'){
 				get_proffesor_data(0);
+				break;
+				}
 				else
 				faild("\nInvalid Input\n");
 			}
@@ -203,11 +209,15 @@ int main(){
 		struct student student = get_student(User.profile);
 		
 				printf("\n\t\tWELLCOM MR.%s\n\n",student.name);
-				
+					if(is_there_nofication(student.id)){
+			printf("\t you have %d New notfications\n",is_there_nofication(student.id));
+			print_notficaton_and_delete_file(student.id);
+		}
 				printf("\n1 for Get your data\n");
 				printf("2 for your courses \n");
 			
 				printf("3 For registeration\n");
+				printf("4 For your done courses\n");
 				
 		while (1)
 
@@ -240,6 +250,16 @@ int main(){
 
 			case 3:
 				registration(student.id);
+			break;
+
+			case 4:
+				for (int i = 0; i < 50; i++)
+				{
+					if(student.done_couses[i].subject_id != 0){
+						printf("\ncourse Name : %s\nGraid : %d\n-----------------\n",get_subject(student.done_couses[i].subject_id).name,student.done_couses[i].grade);
+					}
+				}
+				
 			break;
 			default:
 				break;
@@ -342,7 +362,10 @@ int main(){
 									int sub_adress = is_subject_regestrated(student_id,course.subject);
 									if(is_student_exsist(student_id) && sub_adress && get_student(student_id).subs[sub_adress-1].course_id == course.id){
 											struct student st = get_student(student_id);
-											printf("\n%s\n",st.name);
+											put_graids(st.id,sub_adress-1);
+
+											
+											
 									}else{
 										faild("\nWronge ID\n");
 									}

@@ -11,7 +11,7 @@ char proff_ex[] = "./database/profs/";
 char courses_ex[] = "./database/courses/";
 char admins_ex[] = "./database/admins/";
 char notfcations_ex[] = "./database/notfcations/";
-int calculas0 = 12005;
+int calculas0 = 12006;
 struct user
 {
    int id;
@@ -796,6 +796,9 @@ int creat_student(){
     for(int i = 0;i < 7;i++){
         s.subs[i].free = 1;
     }
+      for(int i = 0;i < 50;i++){
+        s.done_couses[i].subject_id = 0;
+    }
     s.term = 1;
     fwrite(&s,sizeof(struct student),1,file);
     if(file != NULL){
@@ -911,6 +914,7 @@ void get_student_data(int id){
     while(1){
         if(!id){
         printf("\nInput Student ID [-1 for cancle]: ");
+        fflush(stdin);
         scanf("%d",&id);
         }
         if(id == -1)
@@ -923,7 +927,8 @@ void get_student_data(int id){
             
                printf("Name : %s\n",s.name);
                printf("Term : %d\n",s.term);
-               printf("Login-id : %d\n",get_user(get_user_by_profile(s.id)));
+               printf("Term : %f\n",s.gpa);
+               printf("Login-id : %d\n",get_user(get_user_by_profile(s.id)).id);
                printf("Login_password : %s\n",get_user(get_user_by_profile(s.id)).password);
                printf("courses : \n");
                
@@ -935,7 +940,9 @@ void get_student_data(int id){
                printf("\t\tdoctor Name : %s\n",get_proffesor(get_course(s.subs[i].course_id).doctor).name);
                printf("\n\t\t---------------------------\n");
                 }
+
                }
+                break;
               
                 
             }else{
@@ -974,9 +981,10 @@ void get_proffesor_data(int id){
                struct doctor s = get_proffesor(id);
                printf("ID : %d\n",s.id);
                printf("Name : %s\n",s.name);
+               
               // printf("Term : %d\n",s.subs);
               
-                
+              break;  
             }else{
                 faild("\nWronge ID\n");
                 warning("\t\tdoctor dose not exist\n");
@@ -1207,6 +1215,7 @@ void creat_course(){
              faild("\nFaild to create Cours\n");
                 fclose(file);
             }else{
+               
                 fwrite(&s,sizeof(struct course),1,file);
              success("\ncours created successfuly\n");
              fclose(file);
@@ -1458,11 +1467,13 @@ float gpa_calculator(struct student student){
 
 
 void registration(int student_id){
+    int notf = 0;
   if(!student_id){
     while (1)
     {
     printf("Input student Id : ");
     scanf("%d",&student_id);
+    notf = 1;
     if(is_student_exsist(student_id)){
         break;
     }else{
@@ -1535,6 +1546,11 @@ if(student.c0 &&!is_subject_regestrated(student.id,calculas0) && !is_subject_don
         student.not_able_to_reg = 1;
         }
     save_course(cal_course);
+    if(notf){
+            char msg[255];
+            sprintf(msg,"The have new course registerd by admin %s\n",get_subject(calculas0).name);
+             add_notfication(student.id,msg);
+    }
     success("\n\t\t Calculas course rigesterd successfuly\n");
 }// end of claculas0 register
 
@@ -1584,6 +1600,12 @@ int pre = 1;
                                      cal_course.students[free_space][1] = student.id;
                                      cal_course.students[free_space][0] = 1;
                                         save_course(cal_course);
+                                         if(notf){
+                                         char msg[255];
+                                         sprintf(msg,"The have new course registerd by admin %s whith proffesor %s\n",get_subject(cal_course.subject).name,get_proffesor(cal_course.doctor).name);
+                                         add_notfication(student.id,msg);
+
+                                        }
                             success("\n\t\tcourse rigesterd successfuly\n");
                                     break;
 
@@ -1597,7 +1619,7 @@ int pre = 1;
 
                            }else{
                              warning("\n\t\tyou probebly enterd Wronge Id\n");
-                     printf("Do you wanna continue [yes => 1/no => 0] 1: ");
+                     printf("Do you wanna continue [yes => 1/no => 0] : ");
                         scanf("%d",&con);
                            }
 
@@ -1605,7 +1627,7 @@ int pre = 1;
                          
                         }else{
                     warning("\n\t\tthis subject has no courses yet\n");
-                     printf("Do you wanna continue [yes => 1/no => 0] 1: ");
+                     printf("Do you wanna continue [yes => 1/no => 0] : ");
                         scanf("%d",&con);
                         }
                     //Print_all_courses(subject_id,0);
@@ -1617,7 +1639,7 @@ int pre = 1;
                         warning("\n\t\t You must take ");
                         printf("%s",get_subject(get_subject(subject_id).pre).name);
                         warning(" first\n");
-                        printf("Do you wanna continue [yes => 1/no => 0]2 : ");
+                        printf("Do you wanna continue [yes => 1/no => 0] : ");
                         scanf("%d",&con);
 
                     }
@@ -1633,7 +1655,7 @@ int pre = 1;
                 else if( get_subject(subject_id).term != student.term )
                     warning("\n\t\t this subject is not your term\n");
 
-                     printf("Do you wanna continue [yes => 1/no => 0]3 : ");
+                     printf("Do you wanna continue [yes => 1/no => 0] : ");
                         scanf("%d",&con);
             }
     }else
@@ -1657,11 +1679,18 @@ int pre = 1;
 void put_graids(int student_id,int course_address){
     struct student student = get_student(student_id);
     struct course course = get_course(student.subs[course_address].course_id);
+    int student_addrees;
+    for(int i = 0;i<100;i++){
+        if(course.students[i][1] == student.id && course.students[i][0]){
+            student_addrees = i;
+        }
+    }
     int w3,w7,final;
     
     while (1)
     {
     printf("Input The grade out of 100 [-1 for cancle]: ");
+    fflush(stdin);
     scanf("%d",&final);
     if(final == -1){
         return;
@@ -1670,39 +1699,43 @@ void put_graids(int student_id,int course_address){
     else
         break;
     }
-    
-    if(!(final > 50)){
-       warning("\nThis student faild this course becouse his grade under 50\n");
-        student.subs[course_address].free = 1;
-        for (int i = 0; i < 100; i++)
-        {
-            if(student.id == course.students[i][1]){
-                course.students[i][0] = 0;
-            }
-        }
-        
-        return;
-    }else{
-       warning("\nThis student Passed the course\n");
+  
+        int done_adrees = finde_free_space_into_done_courses(student.id);
 
-       int done_adress = finde_free_space_into_done_courses(student.id);
-       student.done_couses[done_adress].grade = final;
-       student.done_couses[done_adress].subject_id = course.subject;
-       sprintf( student.done_couses[done_adress].sub_done_name,"%s",get_subject(course.subject).name);
-       sprintf( student.done_couses[done_adress].code,"%s",get_subject(course.subject).code);
-        //save_student(student);
-        save_course(course);
-        if(!count_registerd_courses(student.id)){
-            student.not_able_to_reg = 0;
+        if(final < 50){
+            faild("\nStudent coudent pass the course\n");
+            student.subs[course_address].free = 1;
+             course.students[student_addrees][0] = 0;
+            course.students[student_addrees][1] = 0;
+              if(count_registerd_courses(student.id) == 0){
             student.gpa = gpa_calculator(student);
+            student.term++;
+           }
+            save_course(course);
+            save_student(student);
+             char msg[255];
+             sprintf(msg,"You faild %s course becous your grade is %d\n",get_subject(course.subject).name,final);
+             add_notfication(student.id,msg);
+            
+        }else {
+            success("\nStudentt passed the course\n");
+            student.subs[course_address].free = 1;
+            student.done_couses[done_adrees].grade = final;
+            student.done_couses[done_adrees].subject_id = course.subject;
+           // student.done_couses[done_adrees].sub_done_name = get_subject(course.subject).name;
+           if(count_registerd_courses(student.id) == 0){
+            student.gpa = gpa_calculator(student);
+            student.term++;
 
+           }
+            save_student(student);
+            course.students[student_addrees][0] = 0;
+            course.students[student_addrees][1] = 0;
+            save_course(course);
+             char msg[255];
+             sprintf(msg,"You successd to pass %s course becous your grade is %d\n",get_subject(course.subject).name,final);
+             add_notfication(student.id,msg);
         }
-    
-
-    }
-
-    
-
 }
 
 

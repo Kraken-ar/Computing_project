@@ -634,8 +634,13 @@ void creat_subject(){
 
     while (1)
     {
-        printf("\n Input Subject uniqe code : ");
+        printf("\n Input Subject uniqe code [q for cancle]: ");
+        fflush(stdin);
+
         scanf("%s",code);
+        if(!strcmp(code,"q")){
+            return;
+        }
          DIR *d;
             struct dirent *dir;
         int counter = 0;
@@ -684,17 +689,21 @@ void creat_subject(){
     printf("\n Input Subject name : ");
       fflush(stdin);
     fgets(sub.name,254 ,stdin);
+    
     //sprintf(sub.name,"%s",subject_buffer);
    //scanf ("%[^\n]%*c", sub.name);
    // scanf("%[^\n]s",&sub.name);
      //   scanf("%s",&sub.name);
     
-    printf("\n Input Subject Term [1-8]: ");
-      fflush(stdin);
-    scanf("%d",&sub.term);
+ 
     if (sub.name[strlen(sub.name) - 1] == '\n') {
     sub.name[strlen(sub.name) - 1] = '\0';
     }
+   
+      printf("\n Input Subject Term [1-8] : ");
+      fflush(stdin);
+    scanf("%d",&sub.term);
+
     
     printf("\n Input Subject hours : ");
       fflush(stdin);
@@ -772,14 +781,20 @@ int creat_student(){
 
     s.id = id;
     printf("\n Input Student Name : ");
-    scanf("%s",&s.name);
+    fflush(stdin);
+   fgets(s.name,255,stdin);
 
+    
+    if (s.name[strlen(s.name) - 1] == '\n') {
+    s.name[strlen(s.name) - 1] = '\0';
+    }
+   
     while (1)
     {
         char pre;
         printf("\n Is the student pre [y/n]: ");
-
-        scanf("%c ",&pre);
+        fflush(stdin);
+        scanf("%c",&pre);
         if(pre == 'y'){
             s.c0 = 1;
             break;
@@ -1025,7 +1040,8 @@ void creat_user(){
     while (1)
     {
     printf("Input User Type\n\tp => professor\n\ts => student\n\ta => adminstrator : ");
-    scanf("%c ",&auth);
+    fflush(stdin);
+    scanf("%c",&auth);
     if(auth == 'a' || auth == 's' || auth == 'p')
     break;
     else
@@ -1038,6 +1054,8 @@ void creat_user(){
      while (1)
     {
     printf("Input User id : ");
+    fflush(stdin);
+
     scanf("%s",&id_s);
     id = atoi(id_s);
     sprintf(file_name,"%s%d.bin",users_ex,id);
@@ -1522,6 +1540,10 @@ if(student.c0 &&!is_subject_regestrated(student.id,calculas0) && !is_subject_don
     Print_all_courses(calculas0,0);
     while (1)
     {
+        if(!is_subject_has_course(calculas0)){
+            warning("\n\t\tthere is no c0 yet\n");
+            goto jump;
+        }
         printf("\nPlease chose on of these groups[id] : ");
         scanf("%d",&calculas_course_id);
         if(is_course_exsist(calculas_course_id) && get_course(calculas_course_id).subject == calculas0){
@@ -1554,7 +1576,7 @@ if(student.c0 &&!is_subject_regestrated(student.id,calculas0) && !is_subject_don
     success("\n\t\t Calculas course rigesterd successfuly\n");
 }// end of claculas0 register
 
-
+jump :
 
 int con = 1;
 int subject_id;

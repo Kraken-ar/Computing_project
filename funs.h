@@ -1835,6 +1835,9 @@ void printLargeAAST() {
         " AAA     AAA AAA     AAA  SSSSSSSSSS      TTT      ",
         " AAA     AAA AAA     AAA   SSSSSSSS       TTT      "
     };
+
+
+    
 printf("\n\n");
     for (i = 0; i < 11; i++) {
         // Set color based on row index
